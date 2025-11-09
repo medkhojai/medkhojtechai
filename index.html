@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedKhoj - Pharma AI Research Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2E8B57;
+            --primary-dark: #1F6B45;
+            --secondary: #2C2C2C;
+            --light: #F5F5F5;
+            --dark: #1A1A1A;
+            --text-light: #333333;
+            --text-dark: #F5F5F5;
+            --card-light: #FFFFFF;
+            --card-dark: #2C2C2C;
+            --border-light: #E0E0E0;
+            --border-dark: #444444;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --info: #2196F3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--text-light);
+        }
+
+        body.dark-mode {
+            background-color: var(--dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--secondary);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .user-info i {
+            color: var(--primary);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            padding: 30px 0;
+            min-height: calc(100vh - 160px);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--secondary) 0%, #3a3a3a 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .hero-section h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .hero-section p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto 25px;
+            line-height: 1.6;
+        }
+
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .example-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .prompt-chip {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .prompt-chip:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Agent Status */
+        .agent-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .agent-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+        }
+
+        body.dark-mode .agent-card {
+            background-color: var(--card-dark);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .agent-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .iqvia { background-color: rgba(33, 150, 243, 0.1); color: var(--info); }
+        .exim { background-color: rgba(76, 175, 80, 0.1); color: var(--success); }
+        .patent { background-color: rgba(255, 152, 0, 0.1); color: var(--warning); }
+        .clinical { background-color: rgba(156, 39, 176, 0.1); color: #9C27B0; }
+        .internal { background-color: rgba(244, 67, 54, 0.1); color: var(--danger); }
+        .web { background-color: rgba(3, 169, 244, 0.1); color: #03A9F4; }
+        .report { background-color: rgba(255, 193, 7, 0.1); color: #FFC107; }
+
+        .agent-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .agent-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        body.dark-mode .agent-card p {
+            color: #AAA;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .active { background-color: var(--success); }
+        .idle { background-color: var(--warning); }
+        .inactive { background-color: #9E9E9E; }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .agent-results {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        body.dark-mode .agent-results {
+            background-color: var(--card-dark);
+        }
+
+        .agent-result-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .agent-result-item:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        body.dark-mode .agent-result-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .agent-result-item.active {
+            background-color: rgba(46, 139, 87, 0.1);
+            border-left-color: var(--primary);
+        }
+
+        .agent-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .agent-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .agent-preview {
+            font-size: 14px;
+            color: #666;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        body.dark-mode .agent-preview {
+            color: #AAA;
+        }
+
+        .result-detail {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .result-detail {
+            background-color: var(--card-dark);
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark-mode .detail-header {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .detail-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border-light);
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .action-btn {
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        .action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .action-btn.primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .detail-content {
+            line-height: 1.6;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark-mode .data-table th, 
+        body.dark-mode .data-table td {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .data-table th {
+            background-color: rgba(0, 0, 0, 0.03);
+            font-weight: 600;
+        }
+
+        body.dark-mode .data-table th {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        body.dark-mode .data-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            height: 300px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        body.dark-mode .chart-container {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .chart-placeholder {
+            text-align: center;
+            color: #888;
+        }
+
+        body.dark-mode .chart-placeholder {
+            color: #AAA;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #CCC;
+        }
+
+        /* Mobile Navigation */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background-color: var(--secondary);
+                flex-direction: column;
+                padding: 20px;
+                gap: 15px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+                z-index: 100;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .header-controls {
+                gap: 10px;
+            }
+
+            .hero-section {
+                padding: 25px 20px;
+            }
+
+            .hero-section h2 {
+                font-size: 26px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-btn {
+                border-radius: 8px;
+                padding: 12px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* File Upload */
+        .file-upload {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed var(--border-light);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        body.dark-mode .file-upload {
+            border-color: var(--border-dark);
+        }
+
+        .upload-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .uploaded-files {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+
+        body.dark-mode .file-item {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            padding: 30px 0;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Insights Page */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .insight-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .insight-card {
+            background-color: var(--card-dark);
+        }
+
+        .insight-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Services Page */
+        .services-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .service-item {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .service-item {
+            background-color: var(--card-dark);
+        }
+
+        .service-item h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Industries Page */
+        .industries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .industry-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .industry-card {
+            background-color: var(--card-dark);
+        }
+
+        .industry-card i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        /* Careers Page */
+        .job-listings {
+            margin-top: 20px;
+        }
+
+        .job-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .job-card {
+            background-color: var(--card-dark);
+        }
+
+        .job-card h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* About Us Page */
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        /* My EY Page */
+        .profile-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .profile-card {
+            background-color: var(--card-dark);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+        }
+
+        /* India Page */
+        .india-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .india-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .india-map {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-mode .india-map {
+            background-color: var(--card-dark);
+        }
+
+        .india-stats {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .india-stats {
+            background-color: var(--card-dark);
+        }
+
+        /* English Page */
+        .language-content {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        .language-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .language-option {
+            padding: 15px 30px;
+            background-color: var(--card-light);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .language-option {
+            background-color: var(--card-dark);
+        }
+
+        .language-option:hover, .language-option.active {
+            background-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-search-plus"></i>
+                    <h1>MedKhoj</h1>
+                </div>
+                
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <nav class="nav-links">
+                    <a href="#" class="nav-link active" data-page="home">Home</a>
+                    <a href="#" class="nav-link" data-page="insights">Insights</a>
+                    <a href="#" class="nav-link" data-page="services">Services</a>
+                    <a href="#" class="nav-link" data-page="industries">Industries</a>
+                    <a href="#" class="nav-link" data-page="careers">Careers</a>
+                    <a href="#" class="nav-link" data-page="about">About us</a>
+                    <a href="#" class="nav-link" data-page="myey">My EY</a>
+                    <a href="#" class="nav-link" data-page="india">India</a>
+                    <a href="#" class="nav-link" data-page="english">English</a>
+                </nav>
+                
+                <div class="header-controls">
+                    <button class="theme-toggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Researcher</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Home Page -->
+        <section id="home" class="page-section active">
+            <div class="container">
+                <section class="hero-section">
+                    <h2>MedKhoj - Pharma AI Research Assistant</h2>
+                    <p>Accelerate drug repurposing research with our Agentic AI solution. Find new indications, analyze market data, and identify innovation opportunities faster.</p>
+                    
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" class="search-input" placeholder="Ask about a molecule, disease, or research topic...">
+                            <button class="search-btn">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        
+                        <div class="example-prompts">
+                            <div class="prompt-chip">Metformin for anti-aging</div>
+                            <div class="prompt-chip">Aspirin cancer prevention trials</div>
+                            <div class="prompt-chip">Repurposing opportunities for Statins</div>
+                        </div>
+                    </div>
+
+                    <div class="file-upload">
+                        <p>Upload internal documents for analysis (PDF, DOC, TXT)</p>
+                        <input type="file" id="file-input" multiple style="display: none;">
+                        <button class="upload-btn" id="upload-trigger">
+                            <i class="fas fa-upload"></i> Choose Files
+                        </button>
+                        <div class="uploaded-files" id="uploaded-files"></div>
+                    </div>
+                </section>
+                
+                <section class="agent-status">
+                    <div class="agent-card">
+                        <div class="agent-icon iqvia">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>IQVIA Insights Agent</h3>
+                        <p>Market trends & therapy area analysis</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-icon exim">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3>EXIM Trends Agent</h3>
+                        <p>Export-import data analysis</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-icon patent">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3>Patent Landscape Agent</h3>
+                        <p>IP analysis & freedom to operate</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-icon clinical">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>Clinical Trials Agent</h3>
+                        <p>Trial pipeline & sponsor data</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-icon internal">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>Internal Knowledge Agent</h3>
+                        <p>Company documents & strategy</p>
+                        <div class="status-indicator">
+                            <div class="status-dot idle"></div>
+                            <span>Idle</span>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-icon web">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Web Intelligence Agent</h3>
+                        <p>Scientific publications & guidelines</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+
+                    <div class="agent-card">
+                        <div class="agent-icon report">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3>Report Generator Agent</h3>
+                        <p>PDF report generation</p>
+                        <div class="status-indicator">
+                            <div class="status-dot active"></div>
+                            <span>Active</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="results-section">
+                    <h2 class="section-title">Research Results</h2>
+                    
+                    <div class="results-container">
+                        <div class="agent-results" id="agent-results">
+                            <!-- Agent results will be populated here -->
+                        </div>
+                        
+                        <div class="result-detail" id="result-detail">
+                            <div class="detail-header">
+                                <div class="detail-title">Select an agent to view details</div>
+                                <div class="detail-actions">
+                                    <button class="action-btn primary" id="pdf-btn" disabled>
+                                        <i class="fas fa-download"></i> PDF
+                                    </button>
+                                    <button class="action-btn" id="share-btn" disabled>
+                                        <i class="fas fa-share"></i> Share
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-content" id="detail-content">
+                                <p>Please select an agent from the left panel to view detailed results.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Insights Page -->
+        <section id="insights" class="page-section">
+            <div class="container">
+                <h2 class="section-title">Industry Insights</h2>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <h3>Pharma Market Trends 2023</h3>
+                        <p>Analysis of the latest trends in pharmaceutical markets, including digital transformation and personalized medicine.</p>
+                    </div>
+                    <div class="insight-card">
+                        <h3>Drug Repurposing Opportunities</h3>
+                        <p>Identification of promising drug repurposing candidates across therapeutic areas.</p>
+                    </div>
+                    <div class="insight-card">
+                        <h3>Regulatory Landscape Update</h3>
+                        <p>Latest changes in pharmaceutical regulations across key markets.</p>
+                    </div>
+                    <div class="insight-card">
+                        <h3>AI in Drug Discovery</h3>
+                        <p>How artificial intelligence is transforming the drug discovery process.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Page -->
+        <section id="services" class="page-section">
+            <div class="container">
+                <h2 class="section-title">Our Services</h2>
+                <div class="services-list">
+                    <div class="service-item">
+                        <h3>Drug Repurposing Research</h3>
+                        <p>Comprehensive analysis of existing drugs for new therapeutic applications using AI-powered insights.</p>
+                    </div>
+                    <div class="service-item">
+                        <h3>Market Intelligence</h3>
+                        <p>Deep dive into market trends, competitor analysis, and growth opportunities.</p>
+                    </div>
+                    <div class="service-item">
+                        <h3>Patent Landscape Analysis</h3>
+                        <p>Detailed IP analysis to identify opportunities and mitigate risks.</p>
+                    </div>
+                    <div class="service-item">
+                        <h3>Clinical Trial Optimization</h3>
+                        <p>Strategic planning and optimization of clinical trial designs and execution.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Industries Page -->
+        <section id="industries" class="page-section">
+            <div class="container">
+                <h2 class="section-title">Industries We Serve</h2>
+                <div class="industries-grid">
+                    <div class="industry-card">
+                        <i class="fas fa-pills"></i>
+                        <h3>Pharmaceuticals</h3>
+                        <p>Innovation and growth strategies for pharma companies</p>
+                    </div>
+                    <div class="industry-card">
+                        <i class="fas fa-dna"></i>
+                        <h3>Biotechnology</h3>
+                        <p>Supporting biotech firms from research to commercialization</p>
+                    </div>
+                    <div class="industry-card">
+                        <i class="fas fa-flask"></i>
+                        <h3>Research Institutions</h3>
+                        <p>Collaborative research and technology transfer</p>
+                    </div>
+                    <div class="industry-card">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>Healthcare Providers</h3>
+                        <p>Clinical implementation and patient care optimization</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Careers Page -->
+        <section id="careers" class="page-section">
+            <div class="container">
+                <h2 class="section-title">Careers at MedKhoj</h2>
+                <div class="job-listings">
+                    <div class="job-card">
+                        <h3>AI Research Scientist</h3>
+                        <p>Join our team to develop cutting-edge AI solutions for drug discovery and repurposing.</p>
+                        <button class="action-btn primary" style="margin-top: 10px;">Apply Now</button>
+                    </div>
+                    <div class="job-card">
+                        <h3>Pharma Data Analyst</h3>
+                        <p>Work with large datasets to extract insights and drive pharmaceutical innovation.</p>
+                        <button class="action-btn primary" style="margin-top: 10px;">Apply Now</button>
+                    </div>
+                    <div class="job-card">
+                        <h3>Product Manager</h3>
+                        <p>Lead the development of our AI-powered research platform.</p>
+                        <button class="action-btn primary" style="margin-top: 10px;">Apply Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Page -->
+        <section id="about" class="page-section">
+            <div class="container">
+                <h2 class="section-title">About MedKhoj</h2>
+                <div class="about-content">
+                    <p>MedKhoj is an AI-powered research platform developed to accelerate pharmaceutical innovation, particularly in the area of drug repurposing.</p>
+                    <p>Our mission is to leverage artificial intelligence to help researchers identify new therapeutic applications for existing drugs, reducing development time and costs while bringing treatments to patients faster.</p>
+                    <p>Founded as part of EY's Techathon initiative, MedKhoj combines domain expertise in pharmaceuticals with cutting-edge AI technology to deliver actionable insights.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- My EY Page -->
+        <section id="myey" class="page-section">
+            <div class="container">
+                <h2 class="section-title">My EY Dashboard</h2>
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3>Dr. Sarah Johnson</h3>
+                            <p>Senior Research Scientist</p>
+                        </div>
+                    </div>
+                    <div class="profile-details">
+                        <p><strong>Department:</strong> Pharmaceutical Research</p>
+                        <p><strong>Location:</strong> Boston, MA</p>
+                        <p><strong>Specialization:</strong> Drug Repurposing & AI Applications</p>
+                        <p><strong>Recent Projects:</strong> 12</p>
+                        <p><strong>Publications:</strong> 8</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- India Page -->
+        <section id="india" class="page-section">
+            <div class="container">
+                <h2 class="section-title">MedKhoj India</h2>
+                <div class="india-content">
+                    <div class="india-map">
+                        <i class="fas fa-map-marked-alt" style="font-size: 100px; color: var(--primary);"></i>
+                    </div>
+                    <div class="india-stats">
+                        <h3>India Operations</h3>
+                        <p><strong>Headquarters:</strong> Hyderabad</p>
+                        <p><strong>Research Centers:</strong> 3</p>
+                        <p><strong>Team Members:</strong> 150+</p>
+                        <p><strong>Focus Areas:</strong> Generic Drugs, API Manufacturing, Digital Health</p>
+                        <p><strong>Key Partnerships:</strong> Leading Indian Pharma Companies, Research Institutes</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- English Page -->
+        <section id="english" class="page-section">
+            <div class="container">
+                <div class="language-content">
+                    <h2 class="section-title">Language Selection</h2>
+                    <p>Select your preferred language for the MedKhoj interface.</p>
+                    <div class="language-options">
+                        <div class="language-option active">English</div>
+                        <div class="language-option">Hindi</div>
+                        <div class="language-option">Spanish</div>
+                        <div class="language-option">French</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MedKhoj</h3>
+                    <p>Accelerating pharmaceutical innovation through Agentic AI solutions for drug repurposing and market analysis.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" class="nav-link" data-page="home">Home</a></li>
+                        <li><a href="#" class="nav-link" data-page="insights">Insights</a></li>
+                        <li><a href="#" class="nav-link" data-page="services">Services</a></li>
+                        <li><a href="#" class="nav-link" data-page="careers">Careers</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                        <li><a href="#"><i class="fab fa-youtube"></i> YouTube</a></li>
+                        <li><a href="#"><i class="fas fa-blog"></i> Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 MedKhoj. All rights reserved. | Techathon 6.0 - Pharma Problem Statement</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mock API implementations
+        const MockAPIs = {
+            // IQVIA Mock API
+            iqvia: {
+                fetchMarketData: (query) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                marketSize: "$4.2B (2023)",
+                                cagr: "12.4%",
+                                therapyArea: "Anti-aging / Longevity",
+                                competitors: ["Unity Biotechnology", "Calico Life Sciences", "BioAge Labs"],
+                                trends: [
+                                    "Increasing investment in senolytics",
+                                    "Growing interest in metabolic regulators for aging",
+                                    "Shift from disease treatment to healthspan extension"
+                                ]
+                            });
+                        }, 1500);
+                    });
+                }
+            },
+
+            // EXIM Mock API
+            exim: {
+                fetchTradeData: (molecule) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                exportTrends: {
+                                    "USA": { volume: "1250 tons", value: "$340M", growth: "+8.2%" },
+                                    "Europe": { volume: "980 tons", value: "$265M", growth: "+5.7%" },
+                                    "Japan": { volume: "420 tons", value: "$115M", growth: "+12.1%" }
+                                },
+                                importTrends: {
+                                    "China": { volume: "850 tons", value: "$95M", growth: "+15.3%" },
+                                    "India": { volume: "720 tons", value: "$82M", growth: "+9.8%" }
+                                },
+                                keyInsights: [
+                                    "China dominates API production with 65% market share",
+                                    "US remains largest consumer market",
+                                    "European imports growing at accelerated rate"
+                                ]
+                            });
+                        }, 1200);
+                    });
+                }
+            },
+
+            // Patent Mock API
+            patent: {
+                searchPatents: (query) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                patents: [
+                                    { id: "US10583201B2", title: "Metformin formulations for longevity", assignee: "Novo Nordisk", expiry: "2035", status: "Active", ftoRisk: "Low" },
+                                    { id: "EP3284821A1", title: "Combination therapy with Metformin", assignee: "Merck", expiry: "2032", status: "Active", ftoRisk: "Medium" },
+                                    { id: "JP2019530406A", title: "Metformin for age-related diseases", assignee: "Takeda", expiry: "2038", status: "Pending", ftoRisk: "High" },
+                                    { id: "US98765432A1", title: "Extended release Metformin", assignee: "Teva", expiry: "2029", status: "Active", ftoRisk: "Low" }
+                                ],
+                                summary: {
+                                    total: 42,
+                                    active: 28,
+                                    expiringSoon: 5,
+                                    highRisk: 3
+                                }
+                            });
+                        }, 1800);
+                    });
+                }
+            },
+
+            // Clinical Trials Mock API
+            clinical: {
+                searchTrials: (query) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                trials: [
+                                    { id: "NCT04889209", title: "Metformin for Aging Frailty", phase: "Phase 2", status: "Recruiting", sponsor: "Harvard University", locations: ["USA", "Canada"] },
+                                    { id: "NCT04298879", title: "Metformin in Age-Related Inflammation", phase: "Phase 3", status: "Active", sponsor: "Novartis", locations: ["Europe"] },
+                                    { id: "NCT05167242", title: "Metformin for Cellular Senescence", phase: "Phase 2", status: "Completed", sponsor: "Mayo Clinic", locations: ["USA"] },
+                                    { id: "NCT04812356", title: "Longevity Effects of Metformin", phase: "Phase 1", status: "Planning", sponsor: "Stanford University", locations: ["USA"] }
+                                ],
+                                summary: {
+                                    total: 18,
+                                    phase1: 4,
+                                    phase2: 8,
+                                    phase3: 6,
+                                    completed: 7
+                                }
+                            });
+                        }, 1600);
+                    });
+                }
+            },
+
+            // Internal Knowledge Mock API
+            internal: {
+                analyzeDocuments: (files) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                keyFindings: [
+                                    "Internal research shows Metformin has potential beyond diabetes",
+                                    "Previous studies focused on cancer prevention, not aging",
+                                    "Company has existing expertise in metabolic disorders",
+                                    "Potential synergy with pipeline product X-2034"
+                                ],
+                                recommendations: [
+                                    "Consider combination therapy approach",
+                                    "Leverage existing manufacturing capabilities",
+                                    "Explore partnership with academic institutions"
+                                ]
+                            });
+                        }, 2000);
+                    });
+                }
+            },
+
+            // Web Intelligence Mock API
+            web: {
+                search: (query) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                publications: [
+                                    { title: "Metformin as a geroprotector: recent evidence", authors: "Smith J et al.", journal: "Nature Aging", year: 2023, link: "#" },
+                                    { title: "The molecular basis for Metformin's effects on aging", authors: "Chen L et al.", journal: "Cell Metabolism", year: 2022, link: "#" },
+                                    { title: "Clinical trials of anti-aging drugs: Metformin leads the way", authors: "Rodriguez M et al.", journal: "The Lancet Healthy Longevity", year: 2023, link: "#" }
+                                ],
+                                guidelines: [
+                                    { title: "FDA Guidance on Anti-Aging Drug Development", source: "FDA", year: 2022, link: "#" },
+                                    { title: "EMA Position on Longevity Therapeutics", source: "EMA", year: 2023, link: "#" }
+                                ],
+                                news: [
+                                    { title: "Breakthrough study shows Metformin extends healthspan", source: "Reuters", date: "2023-05-15", link: "#" },
+                                    { title: "Investors flock to anti-aging biotech startups", source: "Bloomberg", date: "2023-04-22", link: "#" }
+                                ]
+                            });
+                        }, 1400);
+                    });
+                }
+            },
+
+            // Report Generator Mock API
+            report: {
+                generatePDF: (data) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({
+                                url: "#",
+                                filename: `MedKhoj_Research_${new Date().toISOString().split('T')[0]}.pdf`,
+                                size: "2.4 MB"
+                            });
+                        }, 1000);
+                    });
+                }
+            }
+        };
+
+        // Theme Toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
+        
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+        
+        // Navigation
+        const navLinksAll = document.querySelectorAll('.nav-link');
+        const pageSections = document.querySelectorAll('.page-section');
+        
+        navLinksAll.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageId = link.getAttribute('data-page');
+                
+                // Update active nav link
+                navLinksAll.forEach(nav => nav.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Show selected page
+                pageSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(pageId).classList.add('active');
+                
+                // Close mobile menu if open
+                if (window.innerWidth <= 768) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+        
+        // Example Prompt Chips
+        const promptChips = document.querySelectorAll('.prompt-chip');
+        const searchInput = document.querySelector('.search-input');
+        
+        promptChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                searchInput.value = chip.textContent;
+                performSearch(chip.textContent);
+            });
+        });
+        
+        // Search Functionality
+        const searchBtn = document.querySelector('.search-btn');
+        
+        searchBtn.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                performSearch(query);
+            }
+        });
+
+        // File Upload
+        const fileInput = document.getElementById('file-input');
+        const uploadTrigger = document.getElementById('upload-trigger');
+        const uploadedFiles = document.getElementById('uploaded-files');
+
+        uploadTrigger.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            uploadedFiles.innerHTML = '';
+            Array.from(e.target.files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                `;
+                uploadedFiles.appendChild(fileItem);
+            });
+
+            // Analyze documents with Internal Knowledge Agent
+            if (e.target.files.length > 0) {
+                MockAPIs.internal.analyzeDocuments(e.target.files)
+                    .then(data => {
+                        displayInternalResults(data);
+                    });
+            }
+        });
+
+        // Language Selection
+        const languageOptions = document.querySelectorAll('.language-option');
+        languageOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                languageOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                alert(`Language changed to ${option.textContent}`);
+            });
+        });
+
+        // Perform Search
+        function performSearch(query) {
+            // Show loading state
+            searchBtn.innerHTML = '<div class="loading"></div> Searching...';
+            
+            // Clear previous results
+            document.getElementById('agent-results').innerHTML = '';
+            document.getElementById('detail-content').innerHTML = '<p>Processing your query with all agents...</p>';
+            
+            // Simulate Master Agent coordinating all worker agents
+            Promise.all([
+                MockAPIs.iqvia.fetchMarketData(query),
+                MockAPIs.exim.fetchTradeData(query),
+                MockAPIs.patent.searchPatents(query),
+                MockAPIs.clinical.searchTrials(query),
+                MockAPIs.web.search(query)
+            ]).then(results => {
+                // Reset search button
+                searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+                
+                // Display master agent result
+                displayMasterAgentResult(query, results);
+                
+                // Display individual agent results
+                displayAgentResults(query, results);
+            });
+        }
+
+        // Display Master Agent Result
+        function displayMasterAgentResult(query, results) {
+            const agentResults = document.getElementById('agent-results');
+            
+            const masterResult = document.createElement('div');
+            masterResult.className = 'agent-result-item active';
+            masterResult.innerHTML = `
+                <div class="agent-result-header">
+                    <span class="agent-name">Master Agent</span>
+                    <span class="agent-time">Just now</span>
+                </div>
+                <div class="agent-preview">Analysis complete for "${query}". Compiled results from ${results.length} specialized agents.</div>
+            `;
+            
+            agentResults.appendChild(masterResult);
+            
+            // Display master agent details
+            displayMasterDetails(query, results);
+            
+            // Set up click handler
+            masterResult.addEventListener('click', () => {
+                document.querySelectorAll('.agent-result-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                masterResult.classList.add('active');
+                displayMasterDetails(query, results);
+            });
+        }
+
+        // Display Master Agent Details
+        function displayMasterDetails(query, results) {
+            const [iqviaData, eximData, patentData, clinicalData, webData] = results;
+            
+            const detailContent = document.getElementById('detail-content');
+            detailContent.innerHTML = `
+                <h3>Executive Summary</h3>
+                <p>Based on comprehensive analysis of market data, clinical trials, patent landscape, and scientific literature, <strong>${query}</strong> shows significant potential for repurposing opportunities.</p>
+                
+                <h3>Key Findings</h3>
+                <ul>
+                    <li>Market size: ${iqviaData.marketSize} with ${iqviaData.cagr} CAGR</li>
+                    <li>${clinicalData.summary.total} active clinical trials identified</li>
+                    <li>${patentData.summary.total} relevant patents, ${patentData.summary.expiringSoon} expiring soon</li>
+                    <li>${webData.publications.length} recent scientific publications support potential</li>
+                    <li>Export growth trends: ${Object.values(eximData.exportTrends).map(t => t.growth).join(', ')}</li>
+                </ul>
+                
+                <h3>Market Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="marketChart"></canvas>
+                </div>
+                
+                <h3>Clinical Trial Overview</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Count</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Phase 1</td>
+                            <td>${clinicalData.summary.phase1}</td>
+                            <td>Early Development</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 2</td>
+                            <td>${clinicalData.summary.phase2}</td>
+                            <td>Proof of Concept</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 3</td>
+                            <td>${clinicalData.summary.phase3}</td>
+                            <td>Pivotal Trials</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Recommended Next Steps</h3>
+                <ol>
+                    <li>Conduct preclinical studies on novel formulations</li>
+                    <li>File provisional patent for specific applications</li>
+                    <li>Initiate discussions with key opinion leaders</li>
+                    <li>Explore partnership opportunities with academic institutions</li>
+                </ol>
+            `;
+            
+            // Enable PDF button
+            document.getElementById('pdf-btn').disabled = false;
+            document.getElementById('share-btn').disabled = false;
+            
+            // Create chart
+            setTimeout(() => {
+                const ctx = document.getElementById('marketChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Market Size', 'Growth Rate', 'Clinical Trials', 'Patents'],
+                        datasets: [{
+                            label: 'Research Metrics',
+                            data: [4.2, 12.4, clinicalData.summary.total, patentData.summary.total],
+                            backgroundColor: [
+                                'rgba(46, 139, 87, 0.7)',
+                                'rgba(33, 150, 243, 0.7)',
+                                'rgba(76, 175, 80, 0.7)',
+                                'rgba(156, 39, 176, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(46, 139, 87)',
+                                'rgb(33, 150, 243)',
+                                'rgb(76, 175, 80)',
+                                'rgb(156, 39, 176)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        // Display Individual Agent Results
+        function displayAgentResults(query, results) {
+            const [iqviaData, eximData, patentData, clinicalData, webData] = results;
+            const agentResults = document.getElementById('agent-results');
+            
+            const agents = [
+                {
+                    name: 'IQVIA Insights Agent',
+                    time: '2 min ago',
+                    preview: `Market analysis shows ${iqviaData.cagr} CAGR in ${iqviaData.therapyArea}...`,
+                    data: iqviaData,
+                    type: 'iqvia'
+                },
+                {
+                    name: 'EXIM Trends Agent',
+                    time: '3 min ago',
+                    preview: `Export-import analysis shows key trade flows...`,
+                    data: eximData,
+                    type: 'exim'
+                },
+                {
+                    name: 'Patent Landscape Agent',
+                    time: '4 min ago',
+                    preview: `Found ${patentData.patents.length} relevant patents with ${patentData.summary.highRisk} high FTO risks...`,
+                    data: patentData,
+                    type: 'patent'
+                },
+                {
+                    name: 'Clinical Trials Agent',
+                    time: '5 min ago',
+                    preview: `Identified ${clinicalData.trials.length} clinical trials across ${clinicalData.summary.phase3} phase 3 studies...`,
+                    data: clinicalData,
+                    type: 'clinical'
+                },
+                {
+                    name: 'Web Intelligence Agent',
+                    time: '6 min ago',
+                    preview: `Collected ${webData.publications.length} recent scientific publications...`,
+                    data: webData,
+                    type: 'web'
+                }
+            ];
+            
+            agents.forEach(agent => {
+                const agentElement = document.createElement('div');
+                agentElement.className = 'agent-result-item';
+                agentElement.innerHTML = `
+                    <div class="agent-result-header">
+                        <span class="agent-name">${agent.name}</span>
+                        <span class="agent-time">${agent.time}</span>
+                    </div>
+                    <div class="agent-preview">${agent.preview}</div>
+                `;
+                
+                agentResults.appendChild(agentElement);
+                
+                // Set up click handler
+                agentElement.addEventListener('click', () => {
+                    document.querySelectorAll('.agent-result-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    agentElement.classList.add('active');
+                    displayAgentDetails(agent);
+                });
+            });
+        }
+
+        // Display Agent Details
+        function displayAgentDetails(agent) {
+            const detailContent = document.getElementById('detail-content');
+            
+            switch(agent.type) {
+                case 'iqvia':
+                    detailContent.innerHTML = `
+                        <h3>Market Analysis</h3>
+                        <p><strong>Therapy Area:</strong> ${agent.data.therapyArea}</p>
+                        <p><strong>Market Size:</strong> ${agent.data.marketSize}</p>
+                        <p><strong>CAGR:</strong> ${agent.data.cagr}</p>
+                        
+                        <h4>Key Competitors</h4>
+                        <ul>
+                            ${agent.data.competitors.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                        
+                        <h4>Market Trends</h4>
+                        <ul>
+                            ${agent.data.trends.map(t => `<li>${t}</li>`).join('')}
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'exim':
+                    detailContent.innerHTML = `
+                        <h3>Export-Import Analysis</h3>
+                        
+                        <h4>Export Trends</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Region</th>
+                                    <th>Volume</th>
+                                    <th>Value</th>
+                                    <th>Growth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Object.entries(agent.data.exportTrends).map(([region, data]) => `
+                                    <tr>
+                                        <td>${region}</td>
+                                        <td>${data.volume}</td>
+                                        <td>${data.value}</td>
+                                        <td>${data.growth}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        
+                        <h4>Key Insights</h4>
+                        <ul>
+                            ${agent.data.keyInsights.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    `;
+                    break;
+                    
+                case 'patent':
+                    detailContent.innerHTML = `
+                        <h3>Patent Landscape</h3>
+                        <p><strong>Total Patents:</strong> ${agent.data.summary.total}</p>
+                        <p><strong>Active Patents:</strong> ${agent.data.summary.active}</p>
+                        <p><strong>Expiring Soon:</strong> ${agent.data.summary.expiringSoon}</p>
+                        <p><strong>High FTO Risk:</strong> ${agent.data.summary.highRisk}</p>
+                        
+                        <h4>Key Patents</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patent ID</th>
+                                    <th>Title</th>
+                                    <th>Assignee</th>
+                                    <th>Expiry</th>
+                                    <th>FTO Risk</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${agent.data.patents.map(patent => `
+                                    <tr>
+                                        <td>${patent.id}</td>
+                                        <td>${patent.title}</td>
+                                        <td>${patent.assignee}</td>
+                                        <td>${patent.expiry}</td>
+                                        <td><span style="color: ${patent.ftoRisk === 'High' ? '#F44336' : patent.ftoRisk === 'Medium' ? '#FF9800' : '#4CAF50'}">${patent.ftoRisk}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+                    
+                case 'clinical':
+                    detailContent.innerHTML = `
+                        <h3>Clinical Trials Analysis</h3>
+                        <p><strong>Total Trials:</strong> ${agent.data.summary.total}</p>
+                        <p><strong>Phase 1:</strong> ${agent.data.summary.phase1}</p>
+                        <p><strong>Phase 2:</strong> ${agent.data.summary.phase2}</p>
+                        <p><strong>Phase 3:</strong> ${agent.data.summary.phase3}</p>
+                        <p><strong>Completed:</strong> ${agent.data.summary.completed}</p>
+                        
+                        <h4>Recent Trials</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Trial ID</th>
+                                    <th>Title</th>
+                                    <th>Phase</th>
+                                    <th>Status</th>
+                                    <th>Sponsor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${agent.data.trials.map(trial => `
+                                    <tr>
+                                        <td>${trial.id}</td>
+                                        <td>${trial.title}</td>
+                                        <td>${trial.phase}</td>
+                                        <td>${trial.status}</td>
+                                        <td>${trial.sponsor}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    break;
+                    
+                case 'web':
+                    detailContent.innerHTML = `
+                        <h3>Web Intelligence</h3>
+                        
+                        <h4>Recent Publications</h4>
+                        <ul>
+                            ${agent.data.publications.map(pub => `
+                                <li>
+                                    <strong>${pub.title}</strong><br>
+                                    ${pub.authors} - ${pub.journal} (${pub.year})<br>
+                                    <a href="${pub.link}" style="color: var(--info);">View publication</a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        
+                        <h4>Regulatory Guidelines</h4>
+                        <ul>
+                            ${agent.data.guidelines.map(guide => `
+                                <li>
+                                    <strong>${guide.title}</strong><br>
+                                    ${guide.source} (${guide.year})<br>
+                                    <a href="${guide.link}" style="color: var(--info);">View guideline</a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        
+                        <h4>Industry News</h4>
+                        <ul>
+                            ${agent.data.news.map(item => `
+                                <li>
+                                    <strong>${item.title}</strong><br>
+                                    ${item.source} - ${item.date}<br>
+                                    <a href="${item.link}" style="color: var(--info);">Read more</a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    break;
+            }
+            
+            // Enable PDF button
+            document.getElementById('pdf-btn').disabled = false;
+            document.getElementById('share-btn').disabled = false;
+        }
+
+        // Display Internal Results
+        function displayInternalResults(data) {
+            const agentResults = document.getElementById('agent-results');
+            
+            const internalElement = document.createElement('div');
+            internalElement.className = 'agent-result-item';
+            internalElement.innerHTML = `
+                <div class="agent-result-header">
+                    <span class="agent-name">Internal Knowledge Agent</span>
+                    <span class="agent-time">Just now</span>
+                </div>
+                <div class="agent-preview">Analyzed ${document.getElementById('file-input').files.length} internal documents</div>
+            `;
+            
+            agentResults.appendChild(internalElement);
+            
+            // Set up click handler
+            internalElement.addEventListener('click', () => {
+                document.querySelectorAll('.agent-result-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                internalElement.classList.add('active');
+                
+                const detailContent = document.getElementById('detail-content');
+                detailContent.innerHTML = `
+                    <h3>Internal Document Analysis</h3>
+                    
+                    <h4>Key Findings</h4>
+                    <ul>
+                        ${data.keyFindings.map(finding => `<li>${finding}</li>`).join('')}
+                    </ul>
+                    
+                    <h4>Strategic Recommendations</h4>
+                    <ul>
+                        ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                `;
+                
+                // Enable PDF button
+                document.getElementById('pdf-btn').disabled = false;
+                document.getElementById('share-btn').disabled = false;
+            });
+        }
+
+        // PDF Generation
+        document.getElementById('pdf-btn').addEventListener('click', () => {
+            const btn = document.getElementById('pdf-btn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<div class="loading"></div> Generating...';
+            btn.disabled = true;
+            
+            MockAPIs.report.generatePDF()
+                .then(result => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.href = result.url;
+                    link.download = result.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert(`PDF report "${result.filename}" (${result.size}) downloaded successfully!`);
+                });
+        });
+
+        // Share Functionality
+        document.getElementById('share-btn').addEventListener('click', () => {
+            alert('Share functionality would integrate with your collaboration platform (e.g., Teams, Slack, email)');
+        });
+
+        // Initialize with a sample search
+        window.addEventListener('DOMContentLoaded', () => {
+            performSearch('Metformin for anti-aging');
+        });
+    </script>
+</body>
+</html>
